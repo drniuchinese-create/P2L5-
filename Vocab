@@ -1,0 +1,628 @@
+ <!DOCTYPE html>
+  <html lang="zh">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P2U5W2 Quizlet · 学致教育</title>
+  <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.7/dist/hanzi-writer.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Noto Sans SC','Microsoft YaHei',sans-serif;background:#f0ece4;color:#2c2c2c;}
+
+    /* NAV */
+    .nav{position:sticky;top:0;z-index:100;background:#1a5276;display:flex;align-items:center;gap:0;padding:0 12px;box-shadow:0 2px 8px rgba(0,0,0,0.2);overflow-x:auto;}
+    .nav-brand{color:white;font-size:10px;font-weight:700;letter-spacing:2px;padding:12px 12px 12px 0;border-right:1px solid rgba(255,255,255,0.2);margin-right:8px;white-space:nowrap;}
+    .tab{padding:12px 12px;color:rgba(255,255,255,0.65);font-size:11px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;white-space:nowrap;}
+    .tab:hover{color:white;}
+    .tab.active{color:white;border-bottom:3px solid #f39c12;}
+    .nav-count{margin-left:auto;color:rgba(255,255,255,0.5);font-size:10px;white-space:nowrap;padding-left:8px;}
+
+    /* SECTION */
+    .section{display:none;padding:16px;max-width:780px;margin:0 auto;}
+    .section.active{display:block;}
+
+    /* SEC HEADER */
+    .sec-header{background:white;border-radius:14px;padding:14px 18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.07);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+    .sec-icon{font-size:28px;}
+    .sec-title{font-size:16px;font-weight:900;}
+    .sec-sub{font-size:11px;color:#888;margin-top:2px;}
+    .sec-badge{margin-left:auto;font-size:11px;font-weight:700;border-radius:20px;padding:4px 14px;}
+
+    /* FLIP CARDS */
+    .cards-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+    .flip-wrap{perspective:1000px;height:210px;cursor:pointer;}
+    .flip-inner{position:relative;width:100%;height:100%;transition:transform 0.55s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d;}
+    .flip-wrap.flipped .flip-inner{transform:rotateY(180deg);}
+    .flip-front,.flip-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.11);}
+    .flip-front{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+    .f-num{position:absolute;top:8px;left:10px;font-size:9px;font-weight:700;opacity:0.4;}
+    .f-type{position:absolute;top:8px;right:8px;font-size:8px;font-weight:700;border-radius:8px;padding:2px 7px;}
+    .f-char{font-size:54px;font-weight:900;line-height:1;}
+    .f-hint{font-size:10px;opacity:0.55;}
+    .flip-back{transform:rotateY(180deg);background:white;padding:12px 14px;display:flex;flex-direction:column;justify-content:space-between;}
+    .b-char-row{display:flex;align-items:baseline;gap:8px;margin-bottom:3px;}
+    .b-char{font-size:26px;font-weight:900;}
+    .b-pinyin{font-size:14px;color:#e67e22;font-weight:600;letter-spacing:1px;}
+    .b-english{font-size:11px;color:#555;font-style:italic;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid #f0f0f0;}
+    .b-example{font-size:11px;color:#1a5276;font-weight:500;line-height:1.6;margin-bottom:5px;}
+    .ex-lbl{font-size:9px;color:#aaa;font-weight:700;letter-spacing:1px;display:block;margin-bottom:1px;}
+    .b-bottom{display:flex;gap:4px;flex-wrap:wrap;align-items:center;}
+    .b-tag{font-size:9px;border-radius:6px;padding:2px 6px;font-weight:600;}
+    .tag-comp{background:#eaf4fb;color:#1a5276;}
+    .tag-rec{background:#d5f5e3;color:#1e8449;}
+    .tag-wrt{background:#fadbd8;color:#922b21;}
+    .tag-tip{background:#fdebd0;color:#935116;}
+    .flip-hint{text-align:center;font-size:10px;color:#aaa;margin-top:6px;}
+
+    /* ── STROKE ORDER TAB ── */
+    .stroke-intro{background:white;border-radius:12px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:#555;line-height:1.7;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+    .stroke-intro strong{color:#1a5276;}
+    .stroke-set-btns{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+    .set-btn{border:2px solid #d0e8f5;border-radius:10px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;background:white;color:#1a5276;font-family:inherit;transition:all 0.2s;}
+    .set-btn.active{background:#1a5276;color:white;border-color:#1a5276;}
+    .stroke-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+    .stroke-card{background:white;border-radius:14px;padding:14px 10px 12px;box-shadow:0 3px 12px rgba(0,0,0,0.09);display:flex;flex-direction:column;align-items:center;gap:6px;}
+    .stroke-card .sc-char{font-size:13px;font-weight:900;color:#1a5276;}
+    .stroke-card .sc-pinyin{font-size:11px;color:#e67e22;font-weight:600;}
+    .stroke-card .sc-english{font-size:9px;color:#888;text-align:center;}
+    .stroke-svg-wrap{width:120px;height:120px;border:1.5px solid #e8f4fd;border-radius:10px;background:#fafcff;display:flex;align-items:center;justify-content:center;position:relative;}
+    .stroke-btns{display:flex;gap:5px;margin-top:2px;flex-wrap:wrap;justify-content:center;}
+    .sc-btn{border:none;border-radius:7px;padding:4px 10px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.2s;}
+    .sc-btn-anim{background:#1a5276;color:white;}
+    .sc-btn-anim:hover{background:#2e86c1;}
+    .sc-btn-quiz{background:#f39c12;color:white;}
+    .sc-btn-quiz:hover{background:#e67e22;}
+    .sc-btn-reset{background:#eee;color:#555;}
+    .sc-btn-reset:hover{background:#ddd;}
+    .stroke-count-badge{position:absolute;bottom:4px;right:6px;font-size:8px;font-weight:700;color:#aaa;}
+
+    /* STUDY MODE */
+    .study-wrap{max-width:500px;margin:0 auto;}
+    .study-card-wrap{perspective:1200px;height:250px;cursor:pointer;margin-bottom:10px;}
+    .study-inner{position:relative;width:100%;height:100%;transition:transform 0.55s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d;}
+    .study-card-wrap.flipped .study-inner{transform:rotateY(180deg);}
+    .study-front,.study-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,0.13);}
+    .study-front{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+    .study-front .sf-char{font-size:70px;font-weight:900;line-height:1;}
+    .study-front .sf-hint{font-size:11px;opacity:0.55;}
+    .study-back{transform:rotateY(180deg);background:white;padding:22px 26px;display:flex;flex-direction:column;justify-content:center;gap:7px;}
+    .study-back .sb-char-row{display:flex;align-items:baseline;gap:10px;}
+    .study-back .sb-char{font-size:34px;font-weight:900;}
+    .study-back .sb-pinyin{font-size:17px;color:#e67e22;font-weight:600;}
+    .study-back .sb-english{font-size:13px;color:#555;font-style:italic;}
+    .study-back .sb-example{font-size:12px;color:#1a5276;font-weight:500;line-height:1.7;border-top:1px solid #f0f0f0;padding-top:7px;}
+    .study-back .sb-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
+    .study-controls{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+    .study-btn{background:#1a5276;color:white;border:none;border-radius:10px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.2s;}
+    .study-btn:hover{background:#2e86c1;}
+    .study-btn:disabled{background:#ccc;cursor:not-allowed;}
+    .study-progress{font-size:12px;color:#888;}
+    .study-flip-hint{text-align:center;font-size:10px;color:#bbb;margin-top:4px;}
+
+    /* MATCH GAME */
+    .match-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px;}
+    .match-tile{border-radius:10px;padding:10px 6px;text-align:center;cursor:pointer;font-weight:700;border:2px solid transparent;transition:all 0.18s;user-select:none;min-height:56px;display:flex;align-items:center;justify-content:center;}
+    .match-tile.char-tile{background:#eaf4fb;color:#1a5276;font-size:22px;border-color:#d0e8f5;}
+    .match-tile.def-tile{background:#fef9e7;color:#7d6608;font-size:10px;border-color:#fdebd0;line-height:1.4;}
+    .match-tile.selected{border-color:#2e86c1;background:#d6eaf8;transform:scale(1.05);box-shadow:0 2px 8px rgba(46,134,193,0.25);}
+    .match-tile.correct{background:#d5f5e3;border-color:#27ae60;color:#1e8449;animation:pop 0.3s;}
+    .match-tile.wrong{background:#fadbd8;border-color:#e74c3c;animation:shake 0.3s;}
+    .match-tile.matched{opacity:0.3;cursor:default;pointer-events:none;}
+    @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+    @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}100%{transform:translateX(0)}}
+    .match-status{text-align:center;font-size:13px;color:#888;margin-bottom:10px;}
+    .match-btn{display:block;margin:0 auto;background:#1a5276;color:white;border:none;border-radius:10px;padding:9px 26px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+
+    /* WRITE QUIZ */
+    .write-quiz-wrap{max-width:500px;margin:0 auto;}
+    .wq-card{background:white;border-radius:14px;padding:18px 20px;box-shadow:0 4px 14px rgba(0,0,0,0.09);margin-bottom:12px;}
+    .wq-prompt{font-size:12px;color:#888;margin-bottom:5px;}
+    .wq-english{font-size:15px;font-weight:700;color:#2c2c2c;margin-bottom:3px;}
+    .wq-pinyin{font-size:13px;color:#e67e22;font-weight:600;margin-bottom:10px;}
+    .wq-input-row{display:flex;gap:8px;align-items:center;}
+    .wq-input{border:2px solid #d0e8f5;border-radius:8px;padding:7px 10px;font-size:20px;font-family:inherit;width:100px;text-align:center;outline:none;transition:border 0.2s;}
+    .wq-input:focus{border-color:#2e86c1;}
+    .wq-input.correct{border-color:#27ae60;background:#f0fff4;}
+    .wq-input.wrong{border-color:#e74c3c;background:#fff5f5;}
+    .wq-check{background:#1a5276;color:white;border:none;border-radius:8px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
+    .wq-result{font-size:12px;margin-top:5px;font-weight:600;}
+    .wq-result.ok{color:#27ae60;}
+    .wq-result.no{color:#e74c3c;}
+    .wq-boxes{display:flex;gap:3px;margin-top:7px;}
+    .wq-box{width:30px;height:30px;border:1.5px solid #bbb;border-radius:3px;background:linear-gradient(rgba(180,180,180,0.25) 1px,transparent 1px),linear-gradient(90deg,rgba(180,180,180,0.25) 1px,transparent 1px);background-size:50% 50%;}
+
+    /* REFERENCE */
+    .ref-section{background:white;border-radius:14px;padding:16px 18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,0.07);}
+    .ref-section h3{font-size:13px;font-weight:900;margin-bottom:10px;padding-left:10px;}
+    .ref-grid-rec{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;}
+    .ref-grid-wrt{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;}
+    .ref-char-rec{border:1.5px solid #d5f5e3;border-radius:8px;padding:6px 3px;text-align:center;background:#f0fff4;}
+    .ref-char-rec .rc{font-size:20px;font-weight:700;color:#1e8449;}
+    .ref-char-rec .rp{font-size:8px;color:#e67e22;font-weight:600;}
+    .ref-char-rec .re{font-size:7px;color:#888;margin-top:1px;}
+    .ref-char-wrt{border:1.5px solid #d0e8f5;border-radius:10px;padding:7px 5px;text-align:center;background:#f8fcff;}
+    .ref-char-wrt .wc{font-size:26px;font-weight:700;color:#1a5276;}
+    .ref-char-wrt .wp{font-size:9px;color:#e67e22;font-weight:600;margin:2px 0;}
+    .ref-char-wrt .we{font-size:7px;color:#888;margin-bottom:4px;}
+    .ref-char-wrt .wboxes{display:flex;justify-content:center;gap:2px;}
+    .ref-char-wrt .wbox{width:20px;height:20px;border:1px solid #bbb;border-radius:2px;background:linear-gradient(rgba(180,180,180,0.3) 1px,transparent 1px),linear-gradient(90deg,rgba(180,180,180,0.3) 1px,transparent 1px);background-size:50% 50%;}
+
+    select{border:1.5px solid #d0e8f5;border-radius:8px;padding:5px 9px;font-size:11px;font-family:inherit;color:#1a5276;font-weight:700;background:white;}
+
+    @media(max-width:600px){
+      .cards-grid{grid-template-columns:1fr;}
+      .stroke-grid{grid-template-columns:repeat(2,1fr);}
+      .match-grid{grid-template-columns:repeat(3,1fr);}
+      .ref-grid-rec{grid-template-columns:repeat(5,1fr);}
+    }
+  </style>
+  </head>
+  <body>
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="nav-brand">学致教育 · P2U5W2</div>
+    <div class="tab active"  onclick="showSection('cards-rec',this)">👁️ 我会认</div>
+    <div class="tab"         onclick="showSection('cards-wrt',this)">✍️ 我会写</div>
+    <div class="tab"         onclick="showSection('stroke',this)">🖊️ 笔顺</div>
+    <div class="tab"         onclick="showSection('study',this)">📖 学习</div>
+    <div class="tab"         onclick="showSection('match',this)">🎯 配对</div>
+    <div class="tab"         onclick="showSection('writequiz',this)">📝 测验</div>
+    <div class="tab"         onclick="showSection('ref',this)">📋 总览</div>
+    <div class="nav-count">31字</div>
+  </div>
+
+  <!-- ══ TAB 1: 我会认 ══ -->
+  <div id="cards-rec" class="section active">
+    <div class="sec-header">
+      <div class="sec-icon">👁️</div>
+      <div><div class="sec-title">我会认</div><div class="sec-sub">Recognise Characters · 点击卡片翻转</div></div>
+      <span class="sec-badge" style="background:#d5f5e3;color:#1e8449;">21 个字</span>
+    </div>
+    <div class="cards-grid" id="rec-grid"></div>
+    <div class="flip-hint">👆 点击任意卡片翻转查看详情</div>
+  </div>
+
+  <!-- ══ TAB 2: 我会写 ══ -->
+  <div id="cards-wrt" class="section">
+    <div class="sec-header">
+      <div class="sec-icon">✍️</div>
+      <div><div class="sec-title">我会写</div><div class="sec-sub">Write Characters · 点击卡片翻转</div></div>
+      <span class="sec-badge" style="background:#fadbd8;color:#922b21;">10 个字</span>
+    </div>
+    <div class="cards-grid" id="wrt-grid"></div>
+    <div class="flip-hint">👆 点击任意卡片翻转查看详情</div>
+  </div>
+
+  <!-- ══ TAB 3: 笔顺 ══ -->
+  <div id="stroke" class="section">
+    <div class="sec-header">
+      <div class="sec-icon">🖊️</div>
+      <div><div class="sec-title">笔顺动画</div><div class="sec-sub">Stroke Order · 动画演示 + 练习测验</div></div>
+    </div>
+    <div class="stroke-intro">
+      <strong>使用方法：</strong>点击 <strong style="color:#1a5276;">▶ 动画</strong> 观看笔顺演示，点击 <strong style="color:#f39c12;">✏️ 练习</strong> 自己按笔顺描字，点击 <strong style="color:#555;">↺ 重置</strong> 重新开始。笔顺数据来自 <strong>Make Me a Hanzi</strong> 开源项目，涵盖9000+汉字。
+    </div>
+    <div class="stroke-set-btns">
+      <button class="set-btn active" onclick="switchStrokeSet('wrt',this)">✍️ 我会写（10字）</button>
+      <button class="set-btn"        onclick="switchStrokeSet('rec',this)">👁️ 我会认（21字）</button>
+      <button class="set-btn"        onclick="switchStrokeSet('all',this)">📚 全部（31字）</button>
+    </div>
+    <div class="stroke-grid" id="stroke-grid"></div>
+  </div>
+
+  <!-- ══ TAB 4: 学习模式 ══ -->
+  <div id="study" class="section">
+    <div class="sec-header">
+      <div class="sec-icon">📖</div>
+      <div><div class="sec-title">学习模式</div><div class="sec-sub">Study Mode · 一张一张翻阅</div></div>
+      <select id="study-set" onchange="initStudy()">
+        <option value="all">全部 31字</option>
+        <option value="rec">我会认 21字</option>
+        <option value="wrt">我会写 10字</option>
+      </select>
+    </div>
+    <div class="study-wrap">
+      <div class="study-card-wrap" id="study-card" onclick="flipStudy()">
+        <div class="study-inner" id="study-inner">
+          <div class="study-front" id="study-front"></div>
+          <div class="study-back"  id="study-back"></div>
+        </div>
+      </div>
+      <div class="study-flip-hint">👆 点击卡片翻转查看详情</div>
+      <div class="study-controls">
+        <button class="study-btn" id="prev-btn" onclick="studyNav(-1)">← 上一个</button>
+        <div class="study-progress" id="study-prog"></div>
+        <button class="study-btn" id="next-btn" onclick="studyNav(1)">下一个 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 5: 配对游戏 ══ -->
+  <div id="match" class="section">
+    <div class="sec-header">
+      <div class="sec-icon">🎯</div>
+      <div><div class="sec-title">配对游戏</div><div class="sec-sub">Match Game · 汉字配拼音</div></div>
+      <select id="match-set" onchange="initMatch()">
+        <option value="rec">我会认</option>
+        <option value="wrt">我会写</option>
+      </select>
+    </div>
+    <div class="match-status" id="match-status">选一个汉字，再选对应的拼音！</div>
+    <div class="match-grid" id="match-grid"></div>
+    <button class="match-btn" onclick="initMatch()">🔄 重新开始</button>
+  </div>
+
+  <!-- ══ TAB 6: 写字测验 ══ -->
+  <div id="writequiz" class="section">
+    <div class="sec-header">
+      <div class="sec-icon">📝</div>
+      <div><div class="sec-title">写字测验</div><div class="sec-sub">Write Quiz · 看拼音写汉字</div></div>
+      <span class="sec-badge" style="background:#fadbd8;color:#922b21;">我会写 10字</span>
+    </div>
+    <div class="write-quiz-wrap" id="wq-wrap"></div>
+  </div>
+
+  <!-- ══ TAB 7: 总览 ══ -->
+  <div id="ref" class="section">
+    <div class="sec-header">
+      <div class="sec-icon">📋</div>
+      <div><div class="sec-title">词语总览</div><div class="sec-sub">Quick Reference · 全部字词一览</div></div>
+    </div>
+    <div class="ref-section">
+      <h3 style="color:#1e8449;border-left:4px solid #27ae60;">👁️ 我会认（21个字）</h3>
+      <div class="ref-grid-rec" id="ref-rec"></div>
+    </div>
+    <div class="ref-section">
+      <h3 style="color:#1a5276;border-left:4px solid #f39c12;">✍️ 我会写（10个字）</h3>
+      <div class="ref-grid-wrt" id="ref-wrt"></div>
+    </div>
+  </div>
+
+  <script>
+  // ══════════════════════════════════════════════════════════
+  // DATA
+  // ══════════════════════════════════════════════════════════
+  const REC=[
+    {char:"音",pinyin:"yīn",  english:"sound / music",         example:"音乐室在三楼。",          comp:"音乐",  strokes:9},
+    {char:"室",pinyin:"shì",  english:"room",                   example:"音乐室在顶楼。",          comp:"教室",  strokes:9},
+    {char:"哪",pinyin:"nǎ",   english:"which / where",          example:"音乐室在哪里？",          comp:"哪里",  strokes:9},
+    {char:"顶",pinyin:"dǐng", english:"top / apex",             example:"音乐室在顶楼。",          comp:"顶楼",  strokes:8},
+    {char:"楼",pinyin:"lóu",  english:"floor / storey",         example:"教员室在二楼。",          comp:"楼梯",  strokes:13},
+    {char:"术",pinyin:"shù",  english:"art / skill",            example:"美术室在三楼。",          comp:"美术",  strokes:5},
+    {char:"旁",pinyin:"páng", english:"beside / next to",       example:"教员室在楼梯旁边。",      comp:"旁边",  strokes:10},
+    {char:"向",pinyin:"xiàng",english:"towards / direction",    example:"你向前走，就到了。",      comp:"方向",  strokes:6},
+    {char:"就",pinyin:"jiù",  english:"then / right away",      example:"你往前走，就到了。",      comp:"就到了",strokes:12},
+    {char:"往",pinyin:"wǎng", english:"towards / go to",        example:"你往前走，就到了。",      comp:"往前走",strokes:8},
+    {char:"转",pinyin:"zhuǎn",english:"turn",                   example:"向左转，就看到操场了。",  comp:"转弯",  strokes:11},
+    {char:"操",pinyin:"cāo",  english:"exercise / drill",       example:"同学们在操场玩耍。",      comp:"操场",  strokes:16},
+    {char:"运",pinyin:"yùn",  english:"move / transport",       example:"我喜欢运动。",            comp:"运动",  strokes:7},
+    {char:"路",pinyin:"lù",   english:"road / path",            example:"这条路通向操场。",        comp:"路线",  strokes:13},
+    {char:"远",pinyin:"yuǎn", english:"far / distant",          example:"奶奶家很远。",            comp:"远处",  strokes:7},
+    {char:"迷",pinyin:"mí",   english:"lost / confused",        example:"小安迷路了。",            comp:"迷路",  strokes:9},
+    {char:"坡",pinyin:"pō",   english:"slope / hillside",       example:"学校旁边有一个坡。",      comp:"山坡",  strokes:8},
+    {char:"久",pinyin:"jiǔ",  english:"long time",              example:"走了很久，终于到了。",    comp:"很久",  strokes:3},
+    {char:"答",pinyin:"dá",   english:"answer / reply",         example:"老师问，同学答。",        comp:"回答",  strokes:12},
+    {char:"已",pinyin:"yǐ",   english:"already (component)",    example:"你已经到了！",            comp:"已经",  strokes:3},
+    {char:"经",pinyin:"jīng", english:"pass through / already", example:"你已经到了！",            comp:"已经",  strokes:8},
+  ];
+
+  const WRT=[
+    {char:"音",pinyin:"yīn",  english:"sound / music",          example:"音乐室在三楼。",          comp:"音乐",  strokes:9,  tip:"立+日，共9画"},
+    {char:"边",pinyin:"biān", english:"side / edge",             example:"教员室在楼梯旁边。",      comp:"旁边",  strokes:5,  tip:"走之底，共5画"},
+    {char:"向",pinyin:"xiàng",english:"towards / direction",     example:"你向前走，就到了。",      comp:"方向",  strokes:6,  tip:"丿+口+冂，共6画"},
+    {char:"足",pinyin:"zú",   english:"foot / enough",           example:"同学们在足球场踢球。",    comp:"足球",  strokes:7,  tip:"口+止，共7画"},
+    {char:"往",pinyin:"wǎng", english:"towards / go to",         example:"你往前走，就到了。",      comp:"往前走",strokes:8,  tip:"彳+主，共8画"},
+    {char:"运",pinyin:"yùn",  english:"move / luck",             example:"我喜欢运动。",            comp:"运动",  strokes:7,  tip:"走之底+云，共7画"},
+    {char:"动",pinyin:"dòng", english:"move / action",           example:"同学们在运动。",          comp:"运动",  strokes:6,  tip:"云+力，共6画"},
+    {char:"奶",pinyin:"nǎi",  english:"milk / grandmother",      example:"我喝牛奶。",              comp:"奶奶",  strokes:5,  tip:"女+乃，共5画"},
+    {char:"从",pinyin:"cóng", english:"from / follow",           example:"从大门往前走。",          comp:"从...到",strokes:4, tip:"人+人，共4画"},
+    {char:"笑",pinyin:"xiào", english:"laugh / smile",           example:"小安笑着说谢谢。",        comp:"笑着说",strokes:10, tip:"⺮+夭，共10画"},
+  ];
+
+  const ALL=[...WRT.map(d=>({...d,type:'wrt'})),...REC.map(d=>({...d,type:'rec'}))];
+
+  // ══════════════════════════════════════════════════════════
+  // HANZI WRITER INSTANCES
+  // ══════════════════════════════════════════════════════════
+  const hwInstances={};
+
+  function createHanziWriter(containerId, char, opts={}){
+    const defaults={
+      width:100, height:100,
+      padding:8,
+      showOutline:true,
+      strokeColor:'#1a5276',
+      outlineColor:'#d0e8f5',
+      drawingColor:'#e74c3c',
+      drawingWidth:4,
+      strokeAnimationSpeed:0.8,
+      delayBetweenStrokes:200,
+      charDataLoader:(char,onLoad)=>{
+        fetch(`https://cdn.jsdelivr.net/npm/hanzi-writer-data@2.0/${char}.json`)
+          .then(r=>r.json()).then(onLoad)
+          .catch(()=>{ console.warn('No data for:',char); });
+      }
+    };
+    return HanziWriter.create(containerId,char,{...defaults,...opts});
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // STROKE ORDER TAB
+  // ══════════════════════════════════════════════════════════
+  let currentStrokeSet='wrt';
+
+  function switchStrokeSet(set,btn){
+    currentStrokeSet=set;
+    document.querySelectorAll('.set-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    buildStrokeGrid();
+  }
+
+  function buildStrokeGrid(){
+    const data = currentStrokeSet==='wrt' ? WRT
+               : currentStrokeSet==='rec' ? REC
+               : ALL;
+    const grid=document.getElementById('stroke-grid');
+    grid.innerHTML='';
+    // clear old instances
+    Object.keys(hwInstances).forEach(k=>delete hwInstances[k]);
+
+    data.forEach((d,i)=>{
+      const uid=`hw-${currentStrokeSet}-${i}`;
+      const isWrt = d.type==='wrt' || currentStrokeSet==='wrt';
+      const borderCol = isWrt ? '#d0e8f5' : '#d5f5e3';
+      const charCol   = isWrt ? '#1a5276' : '#1e8449';
+      const badgeBg   = isWrt ? '#fadbd8' : '#d5f5e3';
+      const badgeCol  = isWrt ? '#922b21' : '#1e8449';
+      const badgeTxt  = isWrt ? '我会写'  : '我会认';
+
+      grid.innerHTML+=`
+        <div class="stroke-card">
+          <div style="display:flex;align-items:center;gap:6px;width:100%;justify-content:center;">
+            <span class="sc-char" style="color:${charCol};font-size:15px;">${d.char}</span>
+            <span style="font-size:8px;font-weight:700;border-radius:6px;padding:1px 6px;background:${badgeBg};color:${badgeCol};">${badgeTxt}</span>
+          </div>
+          <div class="sc-pinyin">${d.pinyin}</div>
+          <div class="stroke-svg-wrap" style="border-color:${borderCol};">
+            <div id="${uid}"></div>
+            <div class="stroke-count-badge">${d.strokes}画</div>
+          </div>
+          <div class="sc-english">${d.english}</div>
+          <div class="stroke-btns">
+            <button class="sc-btn sc-btn-anim"  onclick="hwAnimate('${uid}')">▶ 动画</button>
+            <button class="sc-btn sc-btn-quiz"  onclick="hwQuiz('${uid}')">✏️ 练习</button>
+            <button class="sc-btn sc-btn-reset" onclick="hwReset('${uid}')">↺ 重置</button>
+          </div>
+          ${d.tip ? `<div style="font-size:9px;color:#aaa;margin-top:2px;">${d.tip}</div>` : ''}
+        </div>`;
+    });
+
+    // init writers after DOM update
+    setTimeout(()=>{
+      data.forEach((d,i)=>{
+        const uid=`hw-${currentStrokeSet}-${i}`;
+        const isWrt = d.type==='wrt' || currentStrokeSet==='wrt';
+        hwInstances[uid]=createHanziWriter(uid, d.char,{
+          strokeColor: isWrt ? '#1a5276' : '#1e8449',
+          outlineColor: isWrt ? '#d0e8f5' : '#d5f5e3',
+        });
+      });
+    },50);
+  }
+
+  function hwAnimate(uid){
+    if(hwInstances[uid]) hwInstances[uid].animateCharacter();
+  }
+  function hwQuiz(uid){
+    if(hwInstances[uid]) hwInstances[uid].quiz({
+      onMistake:(info)=>{ /* optional feedback */ },
+      onCorrectStroke:(info)=>{ /* optional feedback */ },
+      onComplete:(info)=>{ alert(`🎉 完成！共 ${info.totalMistakes} 次错误`); }
+    });
+  }
+  function hwReset(uid){
+    if(hwInstances[uid]) hwInstances[uid].cancelQuiz && hwInstances[uid].cancelQuiz();
+    if(hwInstances[uid]) hwInstances[uid].showCharacter();
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // FLIP CARDS
+  // ══════════════════════════════════════════════════════════
+  function buildFlipCards(data,containerId,type){
+    const grid=document.getElementById(containerId);
+    grid.innerHTML='';
+    data.forEach((d,i)=>{
+      const isRec=type==='rec';
+      const frontBg=isRec?'linear-gradient(135deg,#d5f5e3,#a9dfbf)':'linear-gradient(135deg,#d6eaf8,#aed6f1)';
+      const badgeStyle=isRec?'background:#1e8449;color:white;':'background:#1a5276;color:white;';
+      const badgeText=isRec?'我会认':'我会写';
+      const tagClass=isRec?'tag-rec':'tag-wrt';
+      const charCol=isRec?'#1e8449':'#1a5276';
+      const extraTag=(!isRec&&d.tip)?`<span class="b-tag tag-tip">💡 ${d.tip}</span>`:'';
+      grid.innerHTML+=`
+        <div class="flip-wrap" onclick="this.classList.toggle('flipped')">
+          <div class="flip-inner">
+            <div class="flip-front" style="background:${frontBg};">
+              <span class="f-num">${String(i+1).padStart(2,'0')}</span>
+              <span class="f-type" style="${badgeStyle}">${badgeText}</span>
+              <div class="f-char" style="color:${charCol};">${d.char}</div>
+              <div class="f-hint">点击翻转 👆</div>
+            </div>
+            <div class="flip-back">
+              <div>
+                <div class="b-char-row">
+                  <span class="b-char" style="color:${charCol};">${d.char}</span>
+                  <span class="b-pinyin">${d.pinyin}</span>
+                </div>
+                <div class="b-english">${d.english}</div>
+                <div class="b-example"><span class="ex-lbl">例句 EXAMPLE</span>${d.example}</div>
+              </div>
+              <div class="b-bottom">
+                <span class="b-tag tag-comp">组词：${d.comp}</span>
+                <span class="b-tag ${tagClass}">${badgeText}</span>
+                ${extraTag}
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+  }
+
+  buildFlipCards(REC,'rec-grid','rec');
+  buildFlipCards(WRT,'wrt-grid','wrt');
+
+  // ══════════════════════════════════════════════════════════
+  // STUDY MODE
+  // ══════════════════════════════════════════════════════════
+  let studyData=[],studyIdx=0;
+  function initStudy(){
+    const sel=document.getElementById('study-set').value;
+    studyData=sel==='rec'?REC.map(d=>({...d,type:'rec'})):sel==='wrt'?WRT.map(d=>({...d,type:'wrt'})):ALL;
+    studyData=[...studyData].sort(()=>Math.random()-0.5);
+    studyIdx=0; renderStudyCard();
+  }
+  function renderStudyCard(){
+    const d=studyData[studyIdx];
+    const isRec=d.type==='rec';
+    document.getElementById('study-card').classList.remove('flipped');
+    const col=isRec?'#1e8449':'#1a5276';
+    const bg=isRec?'linear-gradient(135deg,#d5f5e3,#a9dfbf)':'linear-gradient(135deg,#d6eaf8,#aed6f1)';
+    document.getElementById('study-front').style.background=bg;
+    document.getElementById('study-front').innerHTML=`<div class="sf-char" style="color:${col};">${d.char}</div><div class="sf-hint">点击翻转查看详情</div>`;
+    const tipTag=(!isRec&&d.tip)?`<span class="b-tag tag-tip">💡 ${d.tip}</span>`:'';
+    document.getElementById('study-back').innerHTML=`
+      <div class="sb-char-row"><span class="sb-char" style="color:${col};">${d.char}</span><span class="sb-pinyin">${d.pinyin}</span></div>
+      <div class="sb-english">${d.english}</div>
+      <div class="sb-example">${d.example}</div>
+      <div class="sb-tags">
+        <span class="b-tag tag-comp">组词：${d.comp}</span>
+        ${isRec?'<span class="b-tag tag-rec">我会认</span>':'<span class="b-tag tag-wrt">我会写</span>'}
+        ${tipTag}
+      </div>`;
+    document.getElementById('study-prog').textContent=`${studyIdx+1} / ${studyData.length}`;
+    document.getElementById('prev-btn').disabled=studyIdx===0;
+    document.getElementById('next-btn').disabled=studyIdx===studyData.length-1;
+  }
+  function flipStudy(){document.getElementById('study-card').classList.toggle('flipped');}
+  function studyNav(dir){studyIdx+=dir;renderStudyCard();}
+
+  // ══════════════════════════════════════════════════════════
+  // MATCH GAME
+  // ══════════════════════════════════════════════════════════
+  let matchSelected=null,matchScore=0,matchTotal=0;
+  function initMatch(){
+    const sel=document.getElementById('match-set').value;
+    const pool=sel==='rec'?REC:WRT;
+    const sample=[...pool].sort(()=>Math.random()-0.5).slice(0,6);
+    matchTotal=sample.length; matchScore=0; matchSelected=null;
+    document.getElementById('match-status').textContent='选一个汉字，再选对应的拼音！';
+    const chars=sample.map((d,i)=>({id:i,char:d.char,pinyin:d.pinyin,type:'char'}));
+    const defs =sample.map((d,i)=>({id:i,char:d.char,pinyin:d.pinyin,type:'def'}));
+    const tiles=[...chars,...defs].sort(()=>Math.random()-0.5);
+    const grid=document.getElementById('match-grid');
+    grid.innerHTML='';
+    tiles.forEach(t=>{
+      const div=document.createElement('div');
+      div.className=`match-tile ${t.type==='char'?'char-tile':'def-tile'}`;
+      div.textContent=t.type==='char'?t.char:t.pinyin;
+      div.dataset.id=t.id; div.dataset.type=t.type;
+      div.onclick=()=>handleMatch(div,t);
+      grid.appendChild(div);
+    });
+  }
+  function handleMatch(el,t){
+    if(el.classList.contains('matched'))return;
+    if(!matchSelected){matchSelected={el,t};el.classList.add('selected');}
+    else{
+      if(matchSelected.el===el){el.classList.remove('selected');matchSelected=null;return;}
+      if(matchSelected.t.id===t.id&&matchSelected.t.type!==t.type){
+        [matchSelected.el,el].forEach(e=>{e.classList.remove('selected');e.classList.add('correct');setTimeout(()=>e.classList.add('matched'),400);});
+        matchScore++;
+        document.getElementById('match-status').textContent=matchScore===matchTotal?`🎉 全部配对完成！得分：${matchScore}/${matchTotal}`:`✅ 正确！继续加油！（${matchScore}/${matchTotal}）`;
+      }else{
+        [matchSelected.el,el].forEach(e=>{e.classList.add('wrong');setTimeout(()=>e.classList.remove('wrong','selected'),500);});
+        document.getElementById('match-status').textContent='❌ 再试一次！';
+      }
+      matchSelected=null;
+    }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // WRITE QUIZ
+  // ══════════════════════════════════════════════════════════
+  function initWriteQuiz(){
+    const wrap=document.getElementById('wq-wrap');
+    wrap.innerHTML='';
+    WRT.forEach((d,i)=>{
+      wrap.innerHTML+=`
+        <div class="wq-card">
+          <div class="wq-prompt">第 ${i+1} 题 · 根据拼音和英文，写出汉字：</div>
+          <div class="wq-english">${d.english}</div>
+          <div class="wq-pinyin">${d.pinyin}</div>
+          <div class="wq-input-row">
+            <input class="wq-input" id="wq-${i}" maxlength="1" placeholder="？" oninput="checkWQ(${i},'${d.char}')">
+            <button class="wq-check" onclick="revealWQ(${i},'${d.char}')">查看答案</button>
+          </div>
+          <div class="wq-result" id="wqr-${i}"></div>
+          <div class="wq-boxes"><div class="wq-box"></div><div class="wq-box"></div><div class="wq-box"></div></div>
+          <div style="font-size:10px;color:#aaa;margin-top:4px;">组词：${d.comp}${d.tip?' ｜ '+d.tip:''}</div>
+        </div>`;
+    });
+  }
+  function checkWQ(i,ans){
+    const inp=document.getElementById(`wq-${i}`);
+    const res=document.getElementById(`wqr-${i}`);
+    if(inp.value===ans){inp.classList.add('correct');inp.classList.remove('wrong');res.className='wq-result ok';res.textContent='✅ 正确！';}
+    else if(inp.value.length>0){inp.classList.add('wrong');inp.classList.remove('correct');res.className='wq-result no';res.textContent='再想想…';}
+  }
+  function revealWQ(i,ans){
+    const inp=document.getElementById(`wq-${i}`);
+    const res=document.getElementById(`wqr-${i}`);
+    inp.value=ans;inp.classList.add('correct');inp.classList.remove('wrong');
+    res.className='wq-result ok';res.textContent=`答案：${ans}`;
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // REFERENCE
+  // ══════════════════════════════════════════════════════════
+  function initRef(){
+    document.getElementById('ref-rec').innerHTML=REC.map(d=>`
+      <div class="ref-char-rec">
+        <div class="rc">${d.char}</div><div class="rp">${d.pinyin}</div>
+        <div class="re">${d.english.split('/')[0].trim()}</div>
+      </div>`).join('');
+    document.getElementById('ref-wrt').innerHTML=WRT.map(d=>`
+      <div class="ref-char-wrt">
+        <div class="wc">${d.char}</div><div class="wp">${d.pinyin}</div>
+        <div class="we">${d.english.split('/')[0].trim()}</div>
+        <div class="wboxes"><div class="wbox"></div><div class="wbox"></div><div class="wbox"></div></div>
+      </div>`).join('');
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // TAB NAVIGATION
+  // ══════════════════════════════════════════════════════════
+  function showSection(id,tabEl){
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    tabEl.classList.add('active');
+    if(id==='stroke'){ buildStrokeGrid(); }
+    if(id==='study')  { initStudy(); }
+    if(id==='match')  { initMatch(); }
+    if(id==='writequiz'){ initWriteQuiz(); }
+    if(id==='ref')    { initRef(); }
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // INIT
+  // ══════════════════════════════════════════════════════════
+  initStudy();
+  initMatch();
+  initWriteQuiz();
+  initRef();
+  </script>
+  </body>
+  </html>
